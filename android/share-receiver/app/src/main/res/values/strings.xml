@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BBSDataReceiver</string>
+
+    <!-- Labels for the shared switch in ScanResultView (see switchToShowSampleMode/switchToHideMarksMode) -->
+    <string name="switch_label_show_sample">Show Sample</string>
+    <string name="switch_label_hide_marks">Hide Marks</string>
+</resources>

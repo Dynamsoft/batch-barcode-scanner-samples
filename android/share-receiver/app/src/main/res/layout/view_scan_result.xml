@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Content layout for com.dynamsoft.bbsdatareceiver.widget.ScanResultView.
+
+    Uses <merge> because ScanResultView itself IS the root vertical
+    LinearLayout (set up in its constructor) — this avoids inflating a
+    redundant extra ViewGroup around this content.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- ── Header: file name + Hide Marks switch ─────────────────── -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_file_names"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="No files"
+            android:textSize="15sp"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:textColor="@color/text_secondary" />
+
+        <!--
+            Single switch that plays two roles depending on state (see
+            ScanResultView for the state machine):
+              • Before any real data is received → labeled "Show Sample";
+                freely toggled ON/OFF: ON renders the bundled demo data
+                (assets/sample.jpg + sample.csv), OFF reverts to the normal
+                empty state (No files / format-error).
+              • Once a real, validly-formatted share arrives, the switch
+                permanently becomes a "Hide Marks" toggle: ON shows the
+                Original Image (marks removed), OFF shows the Annotated
+                Image (marks visible).
+        -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_hide_marks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/switch_thumb_tint"
+                app:trackTint="@color/switch_track_tint" />
+
+            <TextView
+                android:id="@+id/tv_switch_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Show Sample"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+    </LinearLayout>
+    <!--
+        ── Format error banner ───────────────────────────────────
+        Shown when the received files do not match the expected
+        naming convention. Hidden when the format is valid or no
+        files have been received yet.
+    -->
+    <TextView
+        android:id="@+id/tv_format_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp"
+        android:text="⚠ Format not recognized.\nExpected:\n  • {Scan|History}_{timestamp}_{version}_AnnotatedImage.jpg\n  • {Scan|History}_{timestamp}_{version}_OriginalImage.jpg\n  • {Scan|History}_{timestamp}_{version}.csv"
+        android:textSize="13sp"
+        android:textColor="#B71C1C"
+        android:background="#FFEBEE"
+        android:visibility="gone" />
+
+    <!-- ── Image preview area ─────────────────────────────────────── -->
+    <FrameLayout
+        android:id="@+id/image_section"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/bg_placeholder_box">
+
+        <ImageView
+            android:id="@+id/iv_display"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/image_empty_state"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="52dp"
+                android:layout_height="44dp"
+                android:src="@drawable/ic_image" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="No images uploaded from the\nBatch Barcode Scanner app yet."
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
+
+    <!--
+        ── CSV table area ─────────────────────────────────────────────
+        Takes all remaining vertical space (layout_weight="1") so it is
+        the ONLY part of the screen that scrolls.
+
+        The sticky header (header_hscroll/table_header) is now a single
+        shared view used in BOTH the empty and populated states — it is
+        always visible at the top of this section, and ScanResultView
+        just swaps its contents (placeholder columns vs. real CSV
+        columns). This guarantees the header always looks identical
+        whether or not data has been loaded, instead of relying on a
+        separate hand-styled duplicate.
+    -->
+    <LinearLayout
+        android:id="@+id/table_section"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!--
+            Sticky header — shared by both the empty state and the real
+            CSV table. It never receives touch input directly (see
+            ScanResultView) — it is driven programmatically so it stays
+            in sync with body_hscroll, giving the illusion of a header
+            pinned to the top ("吸顶") while still scrolling horizontally.
+        -->
+        <HorizontalScrollView
+            android:id="@+id/header_hscroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:overScrollMode="never">
+
+            <TableLayout
+                android:id="@+id/table_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="1dp"
+                android:background="@color/border_light" />
+        </HorizontalScrollView>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- Empty-state placeholder body: icon + message only — the header above is shared. -->
+            <LinearLayout
+                android:id="@+id/table_empty_state"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@color/table_row_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="52dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_table" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="No tables uploaded from the\nBatch Barcode Scanner app yet."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <!--
+                ── Real CSV table body: scrollable body only ────────────
+                • body_vscroll is the only vertically-scrolling container;
+                  body_hscroll inside it provides the horizontal scroll for
+                  the data rows.
+                • Column widths for table_header and table_csv are computed
+                  and applied explicitly in ScanResultView so the two tables'
+                  columns always line up.
+            -->
+            <ScrollView
+                android:id="@+id/body_vscroll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:visibility="gone">
+
+                <HorizontalScrollView
+                    android:id="@+id/body_hscroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="horizontal">
+
+                    <!-- shrinkColumns intentionally removed: each column keeps its
+                         explicit width (computed in ScanResultView) and the
+                         HorizontalScrollView handles overflow.
+                         Background colour acts as the grid-line colour between cells. -->
+                    <TableLayout
+                        android:id="@+id/table_csv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="1dp"
+                        android:background="@color/border_light" />
+                </HorizontalScrollView>
+            </ScrollView>
+        </FrameLayout>
+    </LinearLayout>
+
+</merge>

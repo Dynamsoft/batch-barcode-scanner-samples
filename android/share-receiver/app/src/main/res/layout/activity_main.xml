@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    MainActivity's layout is intentionally minimal: it only hosts the
+    reusable com.dynamsoft.bbsdatareceiver.widget.ScanResultView, which
+    owns 100% of the presentation logic for a received scan result.
+    See ScanResultView for the actual UI implementation.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <com.dynamsoft.bbsdatareceiver.widget.ScanResultView
+        android:id="@+id/scan_result_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>
